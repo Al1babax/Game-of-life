@@ -99,7 +99,7 @@ export default function Home() {
                 } else if (oldGrid[x][y] === 1 && (neighbors === 2 || neighbors === 3)) {
                     newGrid[x][y] = 1
                 }
-                 else if (oldGrid[x][y] === 1 && neighbors > 3) {
+                else if (oldGrid[x][y] === 1 && neighbors > 3) {
                     newGrid[x][y] = 0
 
                     // Update stats
@@ -129,7 +129,7 @@ export default function Home() {
         if (isRunning) {
             intervalId = setInterval(() => {
                 update(grid);
-                
+
                 // Update stats
                 setGenerationNumber(generationNumber + 1)
 
@@ -167,7 +167,7 @@ export default function Home() {
 
         // setup initial population
         let population = 0;
-        
+
         // Count all the cells that are alive
         for (let x = 0; x < grid.length; x++) {
             for (let y = 0; y < grid[x].length; y++) {
@@ -230,6 +230,10 @@ export default function Home() {
                 </div>
                 <div className="resetButton w-36 h-12 text-slate-100 bg-blue-500 flex items-center justify-center rounded-xl mt-4 cursor-pointer hover:brightness-110" onClick={resetSimulation}>
                     Reset simulation
+                </div>
+                <div className="flex h-12 mt-4 justify-center items-center gap-1">
+                    <span className="text-slate-100">Status: </span>
+                    <span className={`text-slate-100 ${isRunning ? "text-green-500" : "text-red-500"}`}>{isRunning ? "Running" : "Stopped"}</span>
                 </div>
             </div>
             <div className="game flex justify-center items-top mt-6 gap-3">
