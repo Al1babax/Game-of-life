@@ -1,10 +1,22 @@
 import { useEffect, useState } from "react";
 import Stats from "../components/stats";
 
-export default function Home() {
+export default function HomeProto() {
 
     const [grid, setGrid] = useState([])
     const [isRunning, setIsRunning] = useState(false)
+
+    // Dragging states
+    const [isDragging, setIsDragging] = useState(false);
+    const [dragStartX, setDragStartX] = useState(0);
+    const [dragStartY, setDragStartY] = useState(0);
+    const [gridX, setGridX] = useState(0);
+    const [gridY, setGridY] = useState(0);
+
+    // Zoom states
+    const [zoomOriginX, setZoomOriginX] = useState(0);
+    const [zoomOriginY, setZoomOriginY] = useState(0);
+    const [zoom, setZoom] = useState(1);
 
     // Stats
     const [generationNumber, setGenerationNumber] = useState(0)
@@ -198,15 +210,68 @@ export default function Home() {
         setDead(0)
     }
 
+    // Mouse movements on grid
+    function onMouseDown(e) {
+        setIsDragging(true);
+        setDragStartX(e.clientX);
+        setDragStartY(e.clientY);
+    }
+
+    function onMouseUp() {
+        setIsDragging(false);
+    }
+
+    function onMouseMove(e) {
+        if (isDragging) {
+            const offsetX = e.clientX - dragStartX;
+            const offsetY = e.clientY - dragStartY;
+            setGridX(gridX + offsetX);
+            setGridY(gridY + offsetY);
+            setDragStartX(e.clientX);
+            setDragStartY(e.clientY);
+        }
+    }
+
+    function handleZoom(event) {
+        const rect = event.currentTarget.getBoundingClientRect();
+        const offsetX = event.clientX - rect.left;
+        const offsetY = event.clientY - rect.top;
+
+        const zoomFactor = event.deltaY < 0 ? 1.1 : 0.9;
+        const newZoom = zoom * zoomFactor;
+        const newZoomOriginX = (offsetX - gridX) / zoom;
+        const newZoomOriginY = (offsetY - gridY) / zoom;
+
+        setZoom(newZoom);
+        setZoomOriginX(newZoomOriginX);
+        setZoomOriginY(newZoomOriginY);
+
+        // Prevent the default scroll behavior
+        // event.preventDefault();
+    }
+
+    console.log(gridX, gridY)
+
+
     function RenderGrid() {
         return (
-            <div className="w-[1400px] h-[700px] bg-slate-400 grid gap-[1px]">
+            <div
+                className="bg-slate-400 grid gap-[1px]"
+                onMouseDown={onMouseDown}
+                onMouseUp={onMouseUp}
+                onMouseMove={onMouseMove}
+                onWheel={handleZoom}
+                style={{
+                    transform: `translate(${gridX}px, ${gridY}px) scale(${zoom})`,
+                    transformOrigin: `${zoomOriginX}px ${zoomOriginY}px`, // Set the origin
+                }}
+            >
                 {grid.map((row, x) => (
                     <div key={x} className="flex justify-between items-center gap-[1px]">
                         {row.map((cell, y) => (
                             <div
                                 key={y}
-                                className="w-full h-full"
+                                className="w-8 h-8"
                                 style={{ backgroundColor: getCellColor(x, y) }}
                                 onClick={() => toggleCell(x, y)}
                             ></div>
@@ -217,36 +282,9 @@ export default function Home() {
         )
     }
 
-
     return (
-        <div className="flex flex-col justify-center items-center w-full h-full">
-            <h1 className="text-5xl font-bold text-center pt-10 text-slate-100">Game of Life</h1>
-            <div className="buttons flex gap-1 items-center justify-center w-full">
-                <div className="startButton w-36 h-12 text-slate-100 bg-green-500 flex items-center justify-center rounded-xl mt-4 cursor-pointer hover:brightness-110" onClick={startSimulation}>
-                    Start simulation
-                </div>
-                <div className="stopButton w-36 h-12 text-slate-100 bg-red-500 flex items-center justify-center rounded-xl mt-4 cursor-pointer hover:brightness-110" onClick={stopSimulation}>
-                    Stop simulation
-                </div>
-                <div className="resetButton w-36 h-12 text-slate-100 bg-blue-500 flex items-center justify-center rounded-xl mt-4 cursor-pointer hover:brightness-110" onClick={resetSimulation}>
-                    Reset simulation
-                </div>
-                <div className="flex h-12 mt-4 justify-center items-center gap-1">
-                    <span className="text-slate-100">Status: </span>
-                    <span className={`${isRunning ? "text-green-500" : "text-red-500"}`}>{isRunning ? "Running" : "Stopped"}</span>
-                </div>
-            </div>
-            <div className="game flex justify-center items-top mt-6 gap-3">
-                <RenderGrid />
-                <Stats props={{
-                    generationNumber: generationNumber,
-                    population: population,
-                    maxPopulation: maxPopulation,
-                    minPopulation: minPopulation,
-                    newBorn: newBorn,
-                    dead: dead
-                }} />
-            </div>
+        <div className="flex flex-col justify-center items-center w-full h-full overflow-hidden">
+            <RenderGrid />
         </div>
     );
 }
