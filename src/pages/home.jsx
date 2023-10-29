@@ -1,9 +1,19 @@
 import { useEffect, useState } from "react";
+import Stats from "../components/stats";
 
 export default function Home() {
 
     const [grid, setGrid] = useState([])
     const [isRunning, setIsRunning] = useState(false)
+
+    // Stats
+    const [generationNumber, setGenerationNumber] = useState(0)
+    const [population, setPopulation] = useState(0)
+    const [maxPopulation, setMaxPopulation] = useState(0)
+    const [minPopulation, setMinPopulation] = useState(0)
+    const [newBorn, setNewBorn] = useState(0)
+    const [dead, setDead] = useState(0)
+
 
     // Init 100x50 grid
     function initGrid() {
@@ -45,6 +55,9 @@ export default function Home() {
         // Make deep copy of oldGrid
         let newGrid = JSON.parse(JSON.stringify(oldGrid))
 
+        let newBornTemp = 0
+        let deadTemp = 0
+
         // Loop through each cell in oldGrid
         for (let x = 0; x < oldGrid.length; x++) {
             for (let y = 0; y < oldGrid[x].length; y++) {
@@ -79,17 +92,33 @@ export default function Home() {
                 // Apply rules
                 if (oldGrid[x][y] === 1 && neighbors < 2) {
                     newGrid[x][y] = 0
+
+                    // Update stats
+                    deadTemp++
+
                 } else if (oldGrid[x][y] === 1 && (neighbors === 2 || neighbors === 3)) {
                     newGrid[x][y] = 1
                 }
                  else if (oldGrid[x][y] === 1 && neighbors > 3) {
                     newGrid[x][y] = 0
+
+                    // Update stats
+                    deadTemp++
+
                 } else if (oldGrid[x][y] === 0 && neighbors === 3) {
                     newGrid[x][y] = 1
+
+                    // Update stats
+                    newBornTemp++
                 }
             }
         }
 
+        // Update stats
+        setNewBorn(newBorn + newBornTemp)
+        setDead(dead + deadTemp)
+
+        // Update grid
         setGrid(newGrid)
     }
 
@@ -100,6 +129,24 @@ export default function Home() {
         if (isRunning) {
             intervalId = setInterval(() => {
                 update(grid);
+                
+                // Update stats
+                setGenerationNumber(generationNumber + 1)
+
+                // Calculate population
+                let population = 0
+                for (let x = 0; x < grid.length; x++) {
+                    for (let y = 0; y < grid[x].length; y++) {
+                        if (grid[x][y] === 1) population++
+                    }
+                }
+                setPopulation(population)
+
+                // Calculate max population
+                if (population > maxPopulation) setMaxPopulation(population)
+
+                // Calculate min population
+                if (population < minPopulation) setMinPopulation(population)
             }, 500);
         }
 
@@ -117,6 +164,21 @@ export default function Home() {
     // Start simulation
     function startSimulation() {
         setIsRunning(true)
+
+        // setup initial population
+        let population = 0;
+        
+        // Count all the cells that are alive
+        for (let x = 0; x < grid.length; x++) {
+            for (let y = 0; y < grid[x].length; y++) {
+                if (grid[x][y] === 1) population++
+            }
+        }
+
+        // Update stats
+        setPopulation(population)
+        setMaxPopulation(population)
+        setMinPopulation(population)
     }
 
     // Stop simulation
@@ -128,6 +190,12 @@ export default function Home() {
     function resetSimulation() {
         setIsRunning(false)
         initGrid()
+        setGenerationNumber(0)
+        setPopulation(0)
+        setMaxPopulation(0)
+        setMinPopulation(0)
+        setNewBorn(0)
+        setDead(0)
     }
 
     function RenderGrid() {
@@ -164,8 +232,16 @@ export default function Home() {
                     Reset simulation
                 </div>
             </div>
-            <div className="game flex justify-center items-center mt-6">
+            <div className="game flex justify-center items-top mt-6 gap-3">
                 <RenderGrid />
+                <Stats props={{
+                    generationNumber: generationNumber,
+                    population: population,
+                    maxPopulation: maxPopulation,
+                    minPopulation: minPopulation,
+                    newBorn: newBorn,
+                    dead: dead
+                }} />
             </div>
         </div>
     );
