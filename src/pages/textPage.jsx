@@ -347,7 +347,7 @@ export default function Test() {
             drawGrid()
         }, [])
 
-        useEffect(() => {
+        /* useEffect(() => {
             // Get the canvas element
             const canvas = canvasRef.current;
 
@@ -358,7 +358,7 @@ export default function Test() {
             return () => {
                 canvas.removeEventListener('wheel', handleWheel);
             };
-        }, []); // Empty dependency array for component mounting and unmounting
+        }, []); // Empty dependency array for component mounting and unmounting */
 
         return (
             <canvas
