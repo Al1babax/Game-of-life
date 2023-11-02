@@ -1,9 +1,9 @@
 export default function Stats(props) {
-    // Constructing the stats object
-    props = props.props
+    /* // Constructing the stats object
+    props = props.props */
 
     return (
-        <div className="stats bg-black text-white p-2 pr-10">
+        <div className="stats bg-black text-white p-2 pr-10 rounded">
             <div className="stats__generation">
                 <span>Generation: </span>
                 <span>{props.generationNumber}</span>
