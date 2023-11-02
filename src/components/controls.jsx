@@ -40,8 +40,8 @@ export default function Controls(props) {
                 <span className="text-slate-100">Grid size: </span>
                 <input
                     type="range"
-                    min="2"
-                    max="200"
+                    min="50"
+                    max="250"
                     value={gridSize.width}
                     className="slider"
                     id="myRange"
@@ -51,6 +51,10 @@ export default function Controls(props) {
             <div className="updateSpeed">
                 <span className="text-slate-100">Speed: </span>
                 <span className="text-white">{speed}ms</span>
+            </div>
+            <div className="updateGridSize">
+                <span className="text-slate-100">Grid size: </span>
+                <span className="text-white">{gridSize.rows}x{gridSize.cols}</span>
             </div>
             <div className="flex h-12 justify-center items-center gap-1">
                 <span className="text-slate-100">Status: </span>

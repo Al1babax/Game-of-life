@@ -4,7 +4,7 @@ import Stats from '../components/stats';
 
 export default function Test() {
     const [grid, setGrid] = useState([])
-    const [gridSize, setGridSize] = useState({ rows: 150, cols: 300 })
+    const [gridSize, setGridSize] = useState({ rows: 50, cols: 100 })
     const canvasRef = useRef(null);
 
     // controls
@@ -228,6 +228,9 @@ export default function Test() {
         function handleCanvasMouseDown(e) {
             console.log("mouse down")
 
+            // check if input is mouse 2 down
+            if (e.buttons !== 2) return
+
             // Function to handle dragging
             // Get canvas context
             const ctx = canvasRef.current.getContext('2d')
@@ -253,6 +256,10 @@ export default function Test() {
 
         function handleCanvasMouseMove(e) {
             // Function to handle dragging
+
+            // check if input is mouse 2 down
+            if (e.buttons !== 2) return
+
             // Get canvas context
             const ctx = canvasRef.current.getContext('2d')
 
@@ -415,7 +422,7 @@ export default function Test() {
     function changeGridSize(value) {
         // Function to change grid size
         let newGridSize = {
-            rows: value,
+            rows: Math.floor(value * 0.50),
             cols: value
         }
 
@@ -443,7 +450,7 @@ export default function Test() {
     // console.log(zoomOriginX, zoomOriginY, zoom)
 
     return (
-        <div className=''>
+        <div className={`${isDragging ? "cursor-move" : "cursor-default"}`}>
             <RenderCanvas />
             <div className="controls fixed top-10 left-[600px]">
                 <Controls
