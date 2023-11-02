@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Stats from "../components/stats";
 
 export default function Home() {
 
     const [grid, setGrid] = useState([])
     const [isRunning, setIsRunning] = useState(false)
+
+    const canvasRef = useRef(null);
 
     // Stats
     const [generationNumber, setGenerationNumber] = useState(0)
@@ -21,7 +23,8 @@ export default function Home() {
         for (let i = 0; i < 25; i++) {
             let row = []
             for (let j = 0; j < 50; j++) {
-                row.push(0)
+                if (Math.random() < 0.5) row.push(1)
+                else row.push(0)
             }
             grid.push(row)
         }
@@ -217,6 +220,32 @@ export default function Home() {
         )
     }
 
+    useEffect(() => {
+        // Check that grid is not empty
+        if (!grid || grid.length === 0) return;
+
+        const canvas = canvasRef.current;
+        const ctx = canvas.getContext('2d');
+        const cellSize = 25; // Adjust this value as needed
+        const numRows = grid.length;
+        const numCols = grid[0].length;
+    
+        canvas.width = numCols * cellSize;
+        canvas.height = numRows * cellSize;
+    
+        // Loop through the grid and draw cells on the canvas
+        for (let x = 0; x < numRows; x++) {
+          for (let y = 0; y < numCols; y++) {
+            const cellColor = getCellColor(x, y);
+            const cellX = x * cellSize;
+            const cellY = y * cellSize;
+    
+            ctx.fillStyle = cellColor;
+            ctx.fillRect(cellX, cellY, cellSize, cellSize);
+          }
+        }
+      }, [grid]);
+
 
     return (
         <div className="flex flex-col justify-center items-center w-full h-full">
@@ -237,7 +266,7 @@ export default function Home() {
                 </div>
             </div>
             <div className="game flex justify-center items-top mt-6 gap-3">
-                <RenderGrid />
+                <canvas ref={canvasRef}></canvas>
                 <Stats props={{
                     generationNumber: generationNumber,
                     population: population,

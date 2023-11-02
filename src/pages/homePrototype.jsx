@@ -1,10 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Stats from "../components/stats";
 
 export default function HomeProto() {
 
     const [grid, setGrid] = useState([])
     const [isRunning, setIsRunning] = useState(false)
+
+    const canvasRef = useRef(null);
 
     // Dragging states
     const [isDragging, setIsDragging] = useState(false);
@@ -210,81 +212,105 @@ export default function HomeProto() {
         setDead(0)
     }
 
-    // Mouse movements on grid
-    function onMouseDown(e) {
-        setIsDragging(true);
-        setDragStartX(e.clientX);
-        setDragStartY(e.clientY);
-    }
+    function RenderGrid2() {
+        // You can calculate cell size based on your requirements
+        const cellSize = 10;
 
-    function onMouseUp() {
-        setIsDragging(false);
-    }
+        useEffect(() => {
+            const canvas = canvasRef.current;
+            const context = canvas.getContext("2d");
 
-    function onMouseMove(e) {
-        if (isDragging) {
-            const offsetX = e.clientX - dragStartX;
-            const offsetY = e.clientY - dragStartY;
-            setGridX(gridX + offsetX);
-            setGridY(gridY + offsetY);
+            if (!context) {
+                return;
+            }
+
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            grid.forEach((row, x) => {
+                row.forEach((cell, y) => {
+                    const cellColor = getCellColor(x, y);
+                    context.fillStyle = cellColor;
+                    context.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                });
+            });
+        }, [grid]);
+
+        const handleCanvasClick = (e) => {
+            const canvas = canvasRef.current;
+            const rect = canvas.getBoundingClientRect();
+            const x = Math.floor((e.clientX - rect.left - gridX) / zoom);
+            const y = Math.floor((e.clientY - rect.top - gridY) / zoom);
+        
+            if (x >= 0 && x < 100 && y >= 0 && y < 50) {
+                toggleCell(x, y);
+            }
+        };
+        
+
+        const handleCanvasMouseDown = (e) => {
+            setIsDragging(true);
             setDragStartX(e.clientX);
             setDragStartY(e.clientY);
-        }
-    }
+        };
 
-    function handleZoom(event) {
-        const rect = event.currentTarget.getBoundingClientRect();
-        const offsetX = event.clientX - rect.left;
-        const offsetY = event.clientY - rect.top;
+        const handleCanvasMouseUp = () => {
+            setIsDragging(false);
+        };
 
-        const zoomFactor = event.deltaY < 0 ? 1.1 : 0.9;
-        const newZoom = zoom * zoomFactor;
-        const newZoomOriginX = (offsetX - gridX) / zoom;
-        const newZoomOriginY = (offsetY - gridY) / zoom;
+        const handleCanvasMouseMove = (e) => {
+            if (isDragging) {
+                const offsetX = e.clientX - dragStartX;
+                const offsetY = e.clientY - dragStartY;
+                setGridX(gridX + offsetX);
+                setGridY(gridY + offsetY);
+                setDragStartX(e.clientX);
+                setDragStartY(e.clientY);
+            }
+        };
 
-        setZoom(newZoom);
-        setZoomOriginX(newZoomOriginX);
-        setZoomOriginY(newZoomOriginY);
+        const handleCanvasWheel = (e) => {
+            // e.preventDefault();
+            const canvas = canvasRef.current;
+            const canvasWidth = canvas.width;
+            const canvasHeight = canvas.height;
 
-        // Prevent the default scroll behavior
-        // event.preventDefault();
-    }
+            const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9;
+            const newZoom = zoom * zoomFactor;
 
-    console.log(gridX, gridY)
+            // Calculate the new origin at the middle of the canvas
+            const newOriginX = canvasWidth / 2;
+            const newOriginY = canvasHeight / 2;
 
+            setZoom(newZoom);
+            setZoomOriginX(newOriginX);
+            setZoomOriginY(newOriginY);
+        };
 
-    function RenderGrid() {
+        const canvasWidth = 100 * cellSize;
+        const canvasHeight = 50 * cellSize;
+
         return (
-            <div
-                className="bg-slate-400 grid gap-[1px]"
-                onMouseDown={onMouseDown}
-                onMouseUp={onMouseUp}
-                onMouseMove={onMouseMove}
-                onWheel={handleZoom}
+            <canvas
+                ref={canvasRef}
+                onClick={handleCanvasClick}
+                onMouseDown={handleCanvasMouseDown}
+                onMouseUp={handleCanvasMouseUp}
+                onMouseMove={handleCanvasMouseMove}
+                onWheel={handleCanvasWheel}
                 style={{
                     transform: `translate(${gridX}px, ${gridY}px) scale(${zoom})`,
-                    transformOrigin: `${zoomOriginX}px ${zoomOriginY}px`, // Set the origin
+                    transformOrigin: `${zoomOriginX}px ${zoomOriginY}px`,
                 }}
-            >
-                {grid.map((row, x) => (
-                    <div key={x} className="flex justify-between items-center gap-[1px]">
-                        {row.map((cell, y) => (
-                            <div
-                                key={y}
-                                className="w-8 h-8"
-                                style={{ backgroundColor: getCellColor(x, y) }}
-                                onClick={() => toggleCell(x, y)}
-                            ></div>
-                        ))}
-                    </div>
-                ))}
-            </div>
-        )
+                width={canvasWidth}
+                height={canvasHeight}
+            />
+        );
     }
 
     return (
         <div className="flex flex-col justify-center items-center w-full h-full overflow-hidden">
-            <RenderGrid />
+            {/* <RenderGrid /> */}
+            <RenderGrid2 />
         </div>
     );
 }
