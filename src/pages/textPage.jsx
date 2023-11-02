@@ -2,6 +2,10 @@ import React, { useRef, useState, useEffect } from 'react';
 import Controls from '../components/controls';
 import Stats from '../components/stats';
 
+// TODO: go back in time
+// TODO: fix zooming when toggling cells
+// TODO: choose preset scenarios
+
 export default function Test() {
     const [grid, setGrid] = useState([])
     const [gridSize, setGridSize] = useState({ rows: 50, cols: 100 })
@@ -50,6 +54,8 @@ export default function Test() {
     // Toggle cell state
     function toggleCell(x, y) {
         console.log(x, y)
+        console.log(grid)
+        console.log(grid.length, grid[0].length)
         let newGrid = [...grid]
         newGrid[x][y] = newGrid[x][y] === 0 ? 1 : 0
         setGrid(newGrid)
@@ -176,15 +182,20 @@ export default function Test() {
 
         function handleCanvasClick(e) {
 
-            console.log("click")
+            // console.log("click")
 
             // Get canvas context
             const ctx = canvasRef.current.getContext('2d')
 
             // Get mouse position
             const rect = canvasRef.current.getBoundingClientRect()
-            const x = e.clientX - rect.left
-            const y = e.clientY - rect.top
+            let x = e.clientX - rect.left
+            let y = e.clientY - rect.top
+
+            console.log(e.clientX, e.clientY)
+            console.log(rect.left, rect.top)
+            console.log(x, y)
+            console.log(rect)
 
             // Draw rectangle in the grid
             ctx.fillStyle = 'black'
@@ -219,14 +230,17 @@ export default function Test() {
             const newOriginX = zoomOriginX - x / newZoom;
             const newOriginY = zoomOriginY - y / newZoom;
 
+            // check that new zoom is within boundaries [0.5, 2]
+            if (newZoom < 0.5 || newZoom > 2) return
+
             // Set new zoom and origin
             setZoom(newZoom);
-            setZoomOriginX(newOriginX);
-            setZoomOriginY(newOriginY);
+            /* setZoomOriginX(newOriginX);
+            setZoomOriginY(newOriginY); */
         }
 
         function handleCanvasMouseDown(e) {
-            console.log("mouse down")
+            // console.log("mouse down")
 
             // check if input is mouse 2 down
             if (e.buttons !== 2) return
@@ -420,6 +434,9 @@ export default function Test() {
     }
 
     function changeGridSize(value) {
+        // if value is uneven add one to it
+        if (value % 2 !== 0) value++
+
         // Function to change grid size
         let newGridSize = {
             rows: Math.floor(value * 0.50),
@@ -447,7 +464,7 @@ export default function Test() {
 
     //console.log(grid)
     // console log zooms
-    // console.log(zoomOriginX, zoomOriginY, zoom)
+    console.log(zoomOriginX, zoomOriginY, zoom)
 
     return (
         <div className={`${isDragging ? "cursor-move" : "cursor-default"}`}>

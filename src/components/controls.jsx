@@ -54,7 +54,7 @@ export default function Controls(props) {
             </div>
             <div className="updateGridSize">
                 <span className="text-slate-100">Grid size: </span>
-                <span className="text-white">{gridSize.rows}x{gridSize.cols}</span>
+                <span className="text-white">{gridSize.cols}x{gridSize.rows}</span>
             </div>
             <div className="flex h-12 justify-center items-center gap-1">
                 <span className="text-slate-100">Status: </span>
