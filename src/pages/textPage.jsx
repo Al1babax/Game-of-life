@@ -42,9 +42,12 @@ export default function Test() {
         for (let i = 0; i < gridSize.rows; i++) {
             let row = []
             for (let j = 0; j < gridSize.cols; j++) {
-                /* if (Math.random() < 0.5) row.push(1)
-                else row.push(0) */
-                row.push(0)
+                // random generated
+                if (Math.random() < 0.5) row.push(1)
+                else row.push(0)
+
+                // default
+                /* row.push(0) */
             }
             grid.push(row)
         }
